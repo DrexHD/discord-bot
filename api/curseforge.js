@@ -1,5 +1,6 @@
 const { request } = require('undici');
 const logger = require('../logger');
+require('dotenv').config();
 
 const config = {
   baseUrl: `https://api.curseforge.com`,

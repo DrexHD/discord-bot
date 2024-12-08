@@ -2,6 +2,7 @@ const fs = require('node:fs');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v10');
 const logger = require('../logger');
+require('dotenv').config();
 
 const commands = [];
 const user_commands = [];

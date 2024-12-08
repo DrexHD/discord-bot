@@ -6,12 +6,8 @@ const { listProjectVersions } = require('./api/modrinth');
 const { TrackedProjects, Guilds } = require('./database/db');
 const { EmbedBuilder, codeBlock, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionsBitField } = require('discord.js');
 const dayjs = require('dayjs');
-const { Configuration, OpenAIApi } = require('openai');
+require('dotenv').config();
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
 
 module.exports = {
   /**
@@ -149,39 +145,6 @@ module.exports = {
             `Sent ${guildSettings.notificationStyle} notification for project ${dbProject.name} (${dbProject.id}) in guild ${channel.guild.name} (${channel.guild.id}) in channel ${channel.name} (${channel.id}) for version ${versionData.name} (${versionData.number})`
           );
           break;
-        case 'ai': {
-          const response = await openai.createChatCompletion({
-            model: 'gpt-3.5-turbo',
-            messages: [
-              {
-                role: 'user',
-                content: `Create an announcement with a professional tone for an update to ${dbProject.name} on ${dbProject.platform}. 
-								The new version is ${versionData.name}, it's a ${versionData.type} release, and the changelog is: ${trimChangelog(versionData.changelog)}. 
-								Use markdown formatting to highlight important information`,
-              },
-            ],
-            max_tokens: 1024,
-            n: 1,
-          });
-          logger.debug(response.data);
-
-          if (channel.type === ChannelType.GuildForum) {
-            await channel.threads.create({
-              name: `${versionData.name}`,
-              message: {
-                content: `${response.data.choices[0].message.content}\n${rolesString}`,
-              },
-            });
-          } else {
-            await channel.send({
-              content: `${response.data.choices[0].message.content}\n${rolesString}`,
-            });
-          }
-					logger.info(
-            `Sent ${guildSettings.notificationStyle} notification for project ${dbProject.name} (${dbProject.id}) in guild ${channel.guild.name} (${channel.guild.id}) in channel ${channel.name} (${channel.id}) for version ${versionData.name} (${versionData.number})`
-          );
-          break;
-        }
         default:
           if (channel.type === ChannelType.GuildForum) {
             await channel.threads
@@ -193,28 +156,10 @@ module.exports = {
                     new EmbedBuilder()
                       .setAuthor(embedAuthorData(dbProject.platform))
                       .setColor(embedColorData(dbProject.platform))
-                      .setDescription(`**Changelog**: ${codeBlock(trimChangelog(versionData.changelog, guildSettings.changelogLength))}`)
-                      .setFields(
-                        {
-                          name: 'Version Name',
-                          value: versionData.name,
-                        },
-                        {
-                          name: 'Version Number',
-                          value: `${versionData.number}`,
-                        },
-                        {
-                          name: 'Release Type',
-                          value: `${versionData.type}`,
-                        },
-                        {
-                          name: 'Date Published',
-                          value: `<t:${dayjs(versionData.date).unix()}:f>`,
-                        }
-                      )
+                      .setDescription(`${trimChangelog(versionData.changelog, guildSettings.changelogLength)}`)
                       .setThumbnail(versionData.iconURL)
                       .setTimestamp()
-                      .setTitle(`${dbProject.name} has been updated`),
+                      .setTitle(versionData.name),
                   ],
                   components: [
                     new ActionRowBuilder().addComponents(
@@ -231,28 +176,10 @@ module.exports = {
                 new EmbedBuilder()
                   .setAuthor(embedAuthorData(dbProject.platform))
                   .setColor(embedColorData(dbProject.platform))
-                  .setDescription(`**Changelog**: ${codeBlock(trimChangelog(versionData.changelog, guildSettings.changelogLength))}`)
-                  .setFields(
-                    {
-                      name: 'Version Name',
-                      value: versionData.name,
-                    },
-                    {
-                      name: 'Version Number',
-                      value: `${versionData.number}`,
-                    },
-                    {
-                      name: 'Release Type',
-                      value: `${versionData.type}`,
-                    },
-                    {
-                      name: 'Date Published',
-                      value: `<t:${dayjs(versionData.date).unix()}:f>`,
-                    }
-                  )
+                  .setDescription(`${trimChangelog(versionData.changelog, guildSettings.changelogLength)}`)
                   .setThumbnail(versionData.iconURL)
                   .setTimestamp()
-                  .setTitle(`${dbProject.name} has been updated`),
+                  .setTitle(versionData.name),
               ],
               components: [
                 new ActionRowBuilder().addComponents(
@@ -340,7 +267,10 @@ function embedColorData(platform) {
 }
 
 function trimChangelog(changelog, maxLength) {
-  const formattedChangelog = formatHtmlChangelog(changelog);
+  const formattedChangelog = changelog
+    .split('\n')
+    .filter(line => line.trim() !== '')
+    .join('\n');;
   return formattedChangelog.length > maxLength ? `${formattedChangelog.slice(0, maxLength - 3)}...` : formattedChangelog;
 }
 

@@ -22,10 +22,10 @@ module.exports = {
     setInterval(runUpdatePresence, ms('10m'));
 
     // Send heartbeat to better stack
-    fetch(process.env.BETTERSTACK_HEARTBEAT_URL).catch((error) => logger.error(error));
+    /*fetch(process.env.BETTERSTACK_HEARTBEAT_URL).catch((error) => logger.error(error));
     setInterval(() => {
       fetch(process.env.BETTERSTACK_HEARTBEAT_URL).catch((error) => logger.error(error));
-    }, ms('5m'));
+    }, ms('5m'));*/
 
     async function runSweepDatabase() {
       await sweepDatabase(client);
@@ -39,7 +39,7 @@ module.exports = {
       updatePresenceData(client);
     }
 
-    startServer(client);
+    //startServer(client);
   },
 };
 

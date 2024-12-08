@@ -1,6 +1,7 @@
 const { request } = require('undici');
 const logger = require('../logger');
 const package = require('../package.json');
+require('dotenv').config();
 
 const config = {
   baseUrl: `https://api.modrinth.com`,
