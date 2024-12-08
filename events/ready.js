@@ -83,7 +83,7 @@ async function checkForProjectUpdates(client) {
       logger.warn('A request to CurseForge timed out while checking projects for updates.');
     }
   } else {
-    logger.info('No CurseForge projects in database. Skipping.');
+    //logger.info('No CurseForge projects in database. Skipping.');
   }
 
   // Call the Modrinth API
@@ -99,7 +99,7 @@ async function checkForProjectUpdates(client) {
       logger.warn('A request to Modrinth timed out while checking projects for updates.');
     }
   } else {
-    logger.info('No Modrinth projects in database. Skipping.');
+    //logger.info('No Modrinth projects in database. Skipping.');
   }
 
   // Process information returned from the CurseForge API and perform checks
